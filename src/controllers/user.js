@@ -51,7 +51,13 @@ module.exports = {
         #swagger.tags = ["Users"]
         #swagger.summary = "Get Single User"
     */
-    const data = await UserModel.findOne({ _id: req.params.id });
+
+    let customFilter = {};
+    if (!req.user.isAdmin) {
+      customFilter = { _id: req.user.id };
+    }
+
+    const data = await UserModel.findOne({ _id: filter.id, ...customFilter });
 
     res.status(200).send({
       error: false,
@@ -61,12 +67,17 @@ module.exports = {
 
   update: async (req, res) => {
     /*
-         #swagger.tags = ["Users"]
+        #swagger.tags = ["Users"]
         #swagger.summary = "Update User"
     */
 
+    let customFilter = {};
+    if (!req.user.isAdmin) {
+      customFilter = { _id: req.user.id };
+    }
+
     const data = await UserModel.updateOne(
-      { _id: req.params.id },
+      { _id: filter.id, ...customFilter },
       { ...req.body },
       { runValidators: true }
     );

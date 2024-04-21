@@ -1,6 +1,6 @@
 "use strict";
 /* -------------------------------------------------------
-    NODEJS EXPRESS | CLARUSWAY FullStack Team
+    PERMISSIONS MIDDLEWARE
 ------------------------------------------------------- */
 
 module.exports = {
@@ -10,6 +10,16 @@ module.exports = {
     } else {
       res.errorStatusCode = 403;
       throw new Error("NoPermission: You must login.");
+    }
+  },
+  isAdmin: (req, res, next) => {
+    if (req.user && req.user.isActive && req.user.isAdmin) {
+      next();
+    } else {
+      res.errorStatusCode = 403;
+      throw new Error(
+        "NoPermission: You must login and you have to be an admin."
+      );
     }
   },
 };

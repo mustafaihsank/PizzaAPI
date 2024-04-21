@@ -3,6 +3,7 @@
     Order CONTROLLER
 ------------------------------------------------------- */
 const OrderModel = require("../models/order");
+const PizzaModel = require("../models/pizza");
 /* ------------------------------------------------------- */
 module.exports = {
   list: async (req, res) => {
@@ -20,7 +21,23 @@ module.exports = {
         `
     */
 
-    const data = await res.getModelList(OrderModel, {}, ["userId", "pizzaId"]);
+    // Manage only self-record.
+    let customFilter = {};
+    if (!req.user.isAdmin) {
+      customFilter = { userId: req.user.id };
+    }
+
+    // Nested populate -> To see not see just toppingIds, now you can also see toppings
+    // Nested populate -> Neleri görmek istiyorsan select icine yaz, görmek istemediginin basina - yaz
+    // Nested populate -> select: "-_id, name" gibi
+    const data = await res.getModelList(Order, customFilter, [
+      "userId",
+      {
+        path: "pizzaId",
+        select: "-__v",
+        populate: { path: "toppingIds", select: "name" },
+      },
+    ]);
 
     res.status(200).send({
       error: false,
@@ -37,6 +54,11 @@ module.exports = {
         #swagger.summary = "Create Order"
     */
 
+    if (!req.body?.price) {
+      const pizzaData = await PizzaModel.findOne({ _id: req.body.pizzaId });
+      req.body.price = pizzaData.price;
+    }
+
     const data = await OrderModel.create(req.body);
 
     res.status(201).send({
@@ -50,10 +72,17 @@ module.exports = {
         #swagger.tags = ["Orders"]
         #swagger.summary = "Get Single Order"
     */
-    const data = await OrderModel.findOne({ _id: req.params.id }).populate([
-      "userId",
-      "pizzaId",
-    ]);
+
+    // Manage only self-record.
+    let customFilter = {};
+    if (!req.user.isAdmin) {
+      customFilter = { userId: req.user.id };
+    }
+
+    const data = await Order.findOne({
+      _id: req.params.id,
+      ...customFilter,
+    }).populate(["userId", "pizzaId"]);
 
     res.status(200).send({
       error: false,
