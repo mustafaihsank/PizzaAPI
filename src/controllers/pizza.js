@@ -66,9 +66,22 @@ module.exports = {
         #swagger.summary = "Update Pizza"
     */
 
+    // console.log(req.file); // multer -> upload.single() kullandiysan
+    // console.log(req.files); // multer -> upload.array() kullandiysan
+
+    // Get previous pizza images
+    const prevPizzaImages = await PizzaModel.findOne(
+      { _id: req.params.id },
+      { images: true }
+    );
+
+    req.files.forEach((file) =>
+      prevPizzaImages.images.push("/uploads/" + file.filename)
+    );
+
     const data = await PizzaModel.updateOne(
       { _id: req.params.id },
-      { ...req.body },
+      { ...req.body, images: [...pizza.images] },
       { runValidators: true }
     );
 

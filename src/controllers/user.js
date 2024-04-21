@@ -3,6 +3,7 @@
     USER CONTROLLER
 ------------------------------------------------------- */
 const UserModel = require("../models/user");
+const sendMail = require("../helpers/sendMail");
 /* ------------------------------------------------------- */
 
 module.exports = {
@@ -39,6 +40,13 @@ module.exports = {
     */
 
     const data = await UserModel.create(req.body);
+
+    sendMail(
+      data.email,
+      "Welcome",
+      `<h1>Welcome!</h1>
+      <p>Welcome to our portal!</p>`
+    );
 
     res.status(201).send({
       error: false,

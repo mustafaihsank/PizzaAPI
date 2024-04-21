@@ -35,6 +35,8 @@ dbConnection();
 
 // Accept JSON:
 app.use(express.json());
+// Accept Form-Data
+app.use(express.urlencoded({ extended: true }));
 
 // Logger:
 app.use(require("./src/middlewares/logger"));
@@ -64,6 +66,9 @@ app.all("/", (req, res) => {
     user: req.user,
   });
 });
+
+// Static Files
+app.use("/uploads", express.static("./uploads"));
 
 /* ------------------------------------------------------- */
 
